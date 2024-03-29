@@ -1,7 +1,11 @@
+use std::collections::{HashMap, HashSet};
+
+use crate::utils::grid::Grid;
+
 #[derive(PartialEq)]
 pub enum ValueType {
     Number(u32),
-    Symbol,
+    Symbol(char),
     Dot,
 }
 
@@ -73,7 +77,7 @@ pub fn grid_to_hashmap(grid: &Grid) -> HashMap<(usize, usize), GridPointData> {
                             if map_char == '.' {
                                 ValueType::Dot
                             } else {
-                                ValueType::Symbol
+                                ValueType::Symbol(grid.map[y][x])
                             }
                         },
                     },
@@ -114,7 +118,7 @@ pub fn sum_of_all_adjacent_numbers(
             let grid_point_data = grid_data_map.get(&(x, y)).unwrap();
 
             match grid_point_data.value_type {
-                ValueType::Symbol => {
+                ValueType::Symbol(_) => {
                     for neighbour in &neighbouring_indexes {
                         let x2 = x as i32 + neighbour.0;
                         let y2 = y as i32 + neighbour.1;
