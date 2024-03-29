@@ -1,7 +1,11 @@
 mod day01;
 mod utils;
 
-use std::{env, fs};
+use core::num;
+use std::{
+    collections::{hash_map, HashMap, HashSet},
+    env, fs,
+};
 
 use crate::utils::grid::Grid;
 
@@ -15,8 +19,5 @@ fn main() {
 }
 
 pub fn solve(input: String) -> i32 {
-    let mut grid = Grid::new(input);
-    dbg!(grid);
-
     0
 }
