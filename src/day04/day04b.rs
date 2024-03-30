@@ -1,75 +1,59 @@
-mod utils;
+pub fn solve(input: String) -> u32 {
+    let lines = input.lines();
+    let mut card_counts: Vec<u32> = vec![1; lines.count() + 1];
+    card_counts[0] = 0;
 
-use day03::day03a;
-use utils::grid::Grid;
+    input
+        .lines()
+        .map(|line| -> i32 {
+            println!("================================================================");
+            println!("{}", &line);
 
-pub fn solve(input: String) -> i32 {
-    let grid = Grid::new(input);
-    let grid_data_map = day03a::grid_to_hashmap(&grid);
-    return sum_of_all_gear_ratios(&grid, &grid_data_map);
-}
+            let numbers_string = line.split_once(":").unwrap();
+            let current_id = numbers_string
+                .0
+                .split_whitespace()
+                .last()
+                .unwrap()
+                .parse::<i32>()
+                .unwrap();
 
-pub fn sum_of_all_gear_ratios(
-    grid: &Grid,
-    grid_data_map: &HashMap<(usize, usize), day03a::GridPointData>,
-) -> i32 {
-    let neighbouring_indexes: Vec<(i32, i32)> = vec![
-        (-1, 1),
-        (0, 1),
-        (1, 1),
-        (-1, 0),
-        (1, 0),
-        (-1, -1),
-        (0, -1),
-        (1, -1),
-    ];
+            let (winning_numbers_string, my_number_string) =
+                numbers_string.1.split_once("|").unwrap();
 
-    let mut required_sum = 0;
-    let mut used_ids: HashSet<i32> = HashSet::new();
+            let winning_numbers_set: HashSet<i32> = winning_numbers_string
+                .trim()
+                .split_whitespace()
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<HashSet<i32>>();
 
-    for y in 0..grid.height {
-        for x in 0..grid.width {
-            let grid_data_point = grid_data_map.get(&(x, y)).unwrap();
+            let mut cards_won = 0;
+            my_number_string
+                .trim()
+                .split_whitespace()
+                .map(|s| {
+                    let num = s.parse::<i32>().unwrap();
 
-            match grid_data_point.value_type {
-                day03a::ValueType::Symbol(symbol) => {
-                    if symbol == '*' {
-                        let mut neighbouring_numbers = vec![];
-                        for neighbour in &neighbouring_indexes {
-                            let x2 = x as i32 + neighbour.0;
-                            let y2 = y as i32 + neighbour.1;
-
-                            if x2 >= grid.width as i32
-                                || y2 >= grid.height as i32
-                                || x2 < 0
-                                || y2 < 0
-                            {
-                                break;
-                            }
-
-                            let point = grid_data_map.get(&(x2 as usize, y2 as usize)).unwrap();
-
-                            if used_ids.contains(&point.id) {
-                                continue;
-                            }
-
-                            if let day03a::ValueType::Number(num) = point.value_type {
-                                neighbouring_numbers.push(num);
-                            }
-
-                            used_ids.insert(point.id);
-                        }
-
-                        if neighbouring_numbers.len() == 2 {
-                            required_sum +=
-                                neighbouring_numbers.iter().fold(1, |acc, num| (acc * num));
-                        }
+                    if winning_numbers_set.contains(&num) {
+                        cards_won += 1;
                     }
-                }
-                _ => (),
-            }
-        }
-    }
+                })
+                .for_each(drop);
 
-    required_sum as i32
+            //part 2 ================================================================================
+            let current_id_card_count = card_counts[current_id as usize];
+            for i in 1..cards_won + 1 {
+                let suceeding_id = current_id + i;
+                if suceeding_id < card_counts.len() as i32 {
+                    card_counts[suceeding_id as usize] += 1 * current_id_card_count;
+                }
+            }
+            // print_vector(&card_counts);
+            0
+        })
+        .for_each(drop);
+
+    // dbg!(&card_counts);
+    let answer: u32 = card_counts.iter().sum();
+    answer
 }
