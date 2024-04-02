@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 pub fn print_hashmap<K, V>(hashmap: &HashMap<K, V>)
 where
     K: std::fmt::Debug + std::hash::Hash + Ord,
