@@ -83,33 +83,26 @@ pub fn solve(input: String) -> u64 {
     }
 
     //Iterate over lines
-    input
-        .lines()
-        .map(|line| {
-            //PARSE INPUT
-            let line_split = line.split_once(" ").unwrap();
-            let (cards, bid) = (line_split.0, line_split.1.parse::<u64>().unwrap());
+    input.lines().for_each(|line| {
+        let line_split = line.split_once(" ").unwrap();
+        let (cards, bid) = (line_split.0, line_split.1.parse::<u64>().unwrap());
 
-            //MAP CARDS
-            let mut character_count_tracker = HashMap::<char, u8>::new();
+        let mut character_count_tracker = HashMap::<char, u8>::new();
+        cards.chars().for_each(|c| {
+            *character_count_tracker.entry(c).or_insert(0) += 1;
+        });
 
-            cards
-                .chars()
-                .map(|c| {
-                    character_count_tracker
-                        .entry(c)
-                        .and_modify(|counter| *counter += 1)
-                        .or_insert(1);
-                })
-                .for_each(drop);
+        let hand_type = HandType::get_type(character_count_tracker);
 
-            let hand_type = HandType::get_type(character_count_tracker);
+        all_hand_map
+            .entry(hand_type as u8)
+            .or_insert_with(Vec::new)
+            .push((cards, bid));
+    });
 
-            let datas = all_hand_map.get_mut(&(hand_type as u8)).unwrap();
-            datas.push((cards, bid));
-            datas.sort_by(|a, b| compare_cards(&a.0, &b.0))
-        })
-        .for_each(drop);
+    all_hand_map
+        .iter_mut()
+        .for_each(|(_, datas)| datas.sort_by(|a, b| compare_cards(&a.0, &b.0)));
 
     dbg!(&all_hand_map);
 
