@@ -14,41 +14,26 @@ pub enum HandType {
 
 impl HandType {
     pub fn get_type(mut char_map: HashMap<char, u8>) -> HandType {
-        // Convert HashMap to a vector of key-value pairs
-        let mut char_counter_vec: Vec<(&char, &u8)> = char_map.iter().collect();
-
-        // Sort the vector based on values (ascending order)
-        char_counter_vec.sort_by(|a, b| b.1.cmp(a.1));
-
-        let max_card = *char_counter_vec.iter().next().unwrap().0;
-        if char_map.contains_key(&'J') && char_map.len() > 1 {
-            let j_count = *char_map.get(&'J').unwrap();
-
-            if !max_card.eq(&'J') {
-                char_map
-                    .entry(max_card)
-                    .and_modify(|count| (*count += j_count));
-            } else {
-                char_map
-                    .entry(*char_counter_vec.iter().next().unwrap().0)
-                    .and_modify(|count| (*count += j_count));
+        // Check for 'J' and merge its count with the maximum card count
+        if let Some(j_count) = char_map.remove(&'J') {
+            if let Some((&_max_card, max_count)) =
+                char_map.iter_mut().max_by_key(|(_, &mut count)| count)
+            {
+                *max_count += j_count;
             }
-            char_map.remove(&'J');
         }
 
         match char_map.len() {
             4 => HandType::OnePair,
             3 => {
-                let product = char_map.values().fold(1, |acc, value| (acc * value));
-                if product == 4 {
+                if char_map.values().sum::<u8>() == 4 {
                     HandType::TwoPair
                 } else {
                     HandType::ThreeOfAKind
                 }
             }
             2 => {
-                let product = char_map.values().fold(1, |acc, value| (acc * value));
-                if product == 6 {
+                if char_map.values().sum::<u8>() == 6 {
                     HandType::FullHouse
                 } else {
                     HandType::FourOfAKind
